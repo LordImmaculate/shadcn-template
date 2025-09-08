@@ -3,15 +3,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from "./ui/dropdown-menu";
 
@@ -41,16 +34,20 @@ export default async function UserCard() {
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <form
             action={async () => {
               "use server";
               await signOut();
-              console.log("hi");
             }}
+            className="w-full"
           >
-            <button type="submit">Log out</button>
-            <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+            <button
+              type="submit"
+              className="w-full text-left flex items-center justify-between"
+            >
+              Log out <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+            </button>
           </form>
         </DropdownMenuItem>
       </DropdownMenuContent>
