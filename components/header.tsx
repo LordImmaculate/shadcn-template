@@ -1,18 +1,21 @@
-import { Atom } from "lucide-react";
+"use client";
 import { buttonVariants } from "./ui/button";
 import Link from "next/link";
 import ThemeToggle from "./theme-toggle";
-import { auth } from "@/auth";
+import { usePathname } from "next/navigation";
+import Logo from "./logo";
+import { useSession } from "next-auth/react";
 
-export default async function Header() {
-  const session = await auth();
+export default function Header() {
+  const { data: session } = useSession();
+
+  const pathname = usePathname();
+
+  if (pathname === "/auth/sign-in") return null;
 
   return (
-    <header className="flex items-center justify-between p-4">
-      <Link href="/" className="flex flex-row items-center gap-1">
-        <Atom />
-        <h1 className="text-3xl">Acme</h1>
-      </Link>
+    <header className="flex items-center justify-between p-4 bg-background">
+      <Logo />
       <div className="flex items-center gap-4">
         {!session ? (
           <Link
@@ -21,7 +24,14 @@ export default async function Header() {
           >
             Sign In
           </Link>
-        ) : null}
+        ) : (
+          <Link
+            href="/auth/sign-in"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Account Management
+          </Link>
+        )}
         <ThemeToggle />
       </div>
     </header>

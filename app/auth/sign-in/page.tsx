@@ -1,20 +1,16 @@
 import { auth } from "@/auth";
-import SignInGoogle from "@/components/sign-in-google";
+import { LoginForm } from "@/components/login-form";
+import Logo from "@/components/logo";
 import { redirect } from "next/navigation";
 
-export default async function SignIn() {
+export default async function LoginPage() {
   const session = await auth();
-
-  if (session) return redirect("/");
-
+  if (session) redirect("/");
   return (
-    <div className="flex flex-col items-center mt-12">
-      <h1 className="text-3xl">Sign In</h1>
-      <p className="text-sm text-muted-foreground">
-        Please sign in to continue
-      </p>
-      <div className="mt-4">
-        <SignInGoogle />
+    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+      <div className="flex w-full max-w-sm flex-col gap-6">
+        <Logo />
+        <LoginForm />
       </div>
     </div>
   );
