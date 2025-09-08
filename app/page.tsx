@@ -1,13 +1,17 @@
-import { buttonVariants } from "@/components/ui/button";
-import Link from "next/link";
+import Header from "@/components/header";
 
-export default function Home() {
+export default function Page() {
   return (
-    <div className="flex flex-col items-center mt-12 gap-4">
-      <h1 className="text-3xl font-bold">shadcn/ui template</h1>
-      <Link href="/auth/sign-in" className={buttonVariants()}>
-        Sign In
-      </Link>
-    </div>
+    <>
+      <Header />
+      <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+          <div className="bg-muted/50 aspect-video rounded-xl" />
+          <div className="bg-muted/50 aspect-video rounded-xl" />
+          <div className="bg-muted/50 aspect-video rounded-xl" />
+        </div>
+        <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+      </div>
+    </>
   );
 }
