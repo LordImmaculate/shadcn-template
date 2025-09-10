@@ -20,7 +20,7 @@ export default async function Header() {
           </Link>
         ) : (
           <Link href="/dash" className={buttonVariants({ variant: "outline" })}>
-            Account Management
+            Dashboard
           </Link>
         )}
         <ThemeToggle />

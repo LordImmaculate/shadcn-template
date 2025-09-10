@@ -9,8 +9,10 @@ import {
 } from "./ui/dropdown-menu";
 import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
 import Link from "next/link";
+import { isMobile } from "@/lib/server-utils";
 
 export default async function UserCard() {
+  const mobile = await isMobile();
   const session = await auth();
   if (!session || !session.user) return null;
 
@@ -41,7 +43,7 @@ export default async function UserCard() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="min-w-56 w-(--radix-dropdown-menu-trigger-width)"
-        side="right"
+        side={mobile ? "top" : "right"}
         align="end"
       >
         <DropdownMenuItem>
