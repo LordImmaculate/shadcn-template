@@ -1,15 +1,17 @@
-type BreadcrumbPage = {
+type Page = {
   url: string;
   title: string;
   isActive: boolean;
-  items: BreadcrumbPage[];
+  hidden: boolean;
+  items: Page[];
 };
 
-export const pagesIndex: BreadcrumbPage[] = [
+export const pagesIndex: Page[] = [
   {
     url: "/dash/account",
     title: "Account Management",
     isActive: true,
+    hidden: true,
     items: []
   }
 ];

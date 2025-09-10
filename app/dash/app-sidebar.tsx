@@ -30,6 +30,7 @@ export async function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const pages = pagesIndex.map((item, index) => {
+    if (item.hidden) return null;
     if (item.items?.length > 0) {
       return (
         <Collapsible
