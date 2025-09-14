@@ -3,12 +3,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 
-export default async function AuthError({
+export default function AuthError({
   searchParams
 }: {
   searchParams: { error?: string };
 }) {
-  const { error } = await searchParams;
+  const { error } = searchParams;
 
   let errorMessage;
   switch (error) {

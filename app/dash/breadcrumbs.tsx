@@ -11,7 +11,6 @@ import {
 import { usePathname } from "next/navigation";
 import { pagesIndex } from "./pages-index";
 import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
 
 type Crumb = {
   name: string;
@@ -22,7 +21,6 @@ export default function Breadcrumbs() {
   const path = usePathname();
   const pages = path?.split("/") || [];
   pages.shift(); // Remove the first empty element due to leading slash
-  console.log(pages);
 
   const breadcrumbs: Crumb[] = [];
   let pathSoFar = "/dash";
@@ -46,14 +44,16 @@ export default function Breadcrumbs() {
 
   return (
     <>
-      {pathSoFar !== "/dash" && (
-        <Separator
-          orientation="vertical"
-          className="mr-2 data-[orientation=vertical]:h-4"
-        />
-      )}
       <Breadcrumb>
         <BreadcrumbList>
+          <div className="flex items-center gap-3" suppressHydrationWarning>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/dash">Dashboard</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            {pathSoFar !== "dash" && <BreadcrumbSeparator />}
+          </div>
           {breadcrumbs.map((crumb, index) => {
             const isLast = index === breadcrumbs.length - 1;
             return (
