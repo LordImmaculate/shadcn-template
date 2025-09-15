@@ -10,6 +10,7 @@ import {
 import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
 import Link from "next/link";
 import { isMobile } from "@/lib/server-utils";
+import Image from "next/image";
 
 export default async function UserCard() {
   const mobile = await isMobile();
@@ -17,7 +18,9 @@ export default async function UserCard() {
   if (!session || !session.user) return null;
 
   if (!session.user.name) session.user.name = "No Name";
-  if (!session.user.image) session.user.image = undefined;
+  const imageURL = session.user.image
+    ? `/uploads/${session.user.image}`
+    : "/default-pfp.png";
 
   const initials = session.user.name
     .split(" ")
@@ -28,7 +31,13 @@ export default async function UserCard() {
     <DropdownMenu>
       <DropdownMenuTrigger className="flex flex-row items-center justify-start text-left gap-3 p-2 hover:bg-accent data-[state=open]:bg-sidebar-accent rounded-lg">
         <Avatar className="h-8 w-8 rounded-lg">
-          <AvatarImage src={session.user.image} alt="User Avatar" />
+          <Image
+            src={imageURL}
+            alt="User Avatar"
+            width={48}
+            height={48}
+            priority
+          />
           <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
         </Avatar>
         <div className="flex flex-col">

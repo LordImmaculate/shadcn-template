@@ -1,14 +1,12 @@
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 
-export default function AuthError({
-  searchParams
+export default async function AuthError({
+  params: searchParams
 }: {
-  searchParams: { error?: string };
+  params: Promise<{ error?: string }>;
 }) {
-  const { error } = searchParams;
+  const { error } = await searchParams;
 
   let errorMessage;
   switch (error) {
