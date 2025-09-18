@@ -109,7 +109,7 @@ export default function Dash() {
             /> */}
             <Dialog>
               <DialogTrigger
-                className={`absolute bottom-2 right-2 transition-opacity opacity-0 group-hover:opacity-100 ${buttonVariants()}`}
+                className={`absolute bottom-2 right-2 transition-opacity opacity-0 group-hover:opacity-100 ${buttonVariants({ size: "icon" })}`}
               >
                 <PenLine />
               </DialogTrigger>
