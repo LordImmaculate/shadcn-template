@@ -9,15 +9,17 @@ generator client {
 }
 
 model User {
-    id            String          @id @default(cuid())
-    name          String?
-    email         String          @unique
-    emailVerified DateTime?
-    image         String          @default("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBLjPO-2--UeYzGEvQJf4OFiEqBKfZt-RxMw&s")
-    accounts      Account[]
-    sessions      Session[]
+    id                    String          @id @default(cuid())
+    name                  String?
+    email                 String          @unique
+    emailVerified         DateTime?
+    emailVerificationCode Int?
+    emailPending          String?         @unique
+    image                 String?
+    accounts              Account[]
+    sessions              Session[]
     // Optional for WebAuthn support
-    Authenticator Authenticator[]
+    Authenticator         Authenticator[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

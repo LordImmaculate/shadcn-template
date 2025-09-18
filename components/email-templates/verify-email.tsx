@@ -1,4 +1,5 @@
 import { TypographyH1, TypographyInlineCode, TypographyP } from "../typography";
+import { buttonVariants } from "../ui/button";
 
 export function VerifyEmail({
   name,
@@ -16,9 +17,15 @@ export function VerifyEmail({
       <TypographyH1>Change email for {name}</TypographyH1>
       <TypographyP>Old email: {oldEmail}</TypographyP>
       <TypographyP>New email: {newEmail}</TypographyP>
-      <TypographyP>
-        Verification code: <TypographyInlineCode>{code}</TypographyInlineCode>
-      </TypographyP>
+      <div className="my-4 p-4 bg-muted rounded">
+        Click this button to confirm your new email address:
+        <a
+          href={`${process.env.DOMAIN}/auth/verify-email?code=${code}`}
+          className={buttonVariants({})}
+        >
+          Confirm Email
+        </a>
+      </div>
       <TypographyP>
         If you did not request this change, please change your password
         immediately.

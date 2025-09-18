@@ -9,12 +9,21 @@ import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { PenLine } from "lucide-react";
-import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import ImageCropper from "./imagecrop";
 
 export default function Dash() {
   const { data: session } = useSession();
   const [state, action, pending] = useActionState(saveChanges, undefined);
-  const [pfpURL, setPfpURL] = useState<string>("/default.jpg");
+  const [pfpURL, setPfpURL] = useState<string | null>(null);
 
   useEffect(() => {
     if (session?.user?.image) {
@@ -73,8 +82,9 @@ export default function Dash() {
             Save
           </Button>
           <div className="absolute right-5 top-5 group">
+            <Input type="hidden" name="image" value={pfpURL || ""} />
             <Image
-              src={pfpURL}
+              src={pfpURL || "/default.jpg"}
               alt="User Avatar"
               className="h-44 w-44 rounded-xl"
               width={200}
@@ -84,7 +94,7 @@ export default function Dash() {
               blurDataURL="/default-blur.png"
             />
             {/* <AvatarFallback className="rounded-lg">{initials}</AvatarFallback> */}
-            <Input
+            {/* <Input
               type="file"
               name="image"
               id="image"
@@ -96,13 +106,36 @@ export default function Dash() {
                   setPfpURL(URL.createObjectURL(file));
                 }
               }}
-            />
-            <Label
+            /> */}
+            <Dialog>
+              <DialogTrigger
+                className={`absolute bottom-2 right-2 transition-opacity opacity-0 group-hover:opacity-100 ${buttonVariants()}`}
+              >
+                <PenLine />
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Upload your profile picture here</DialogTitle>
+                </DialogHeader>
+                <ImageCropper
+                  croppedImage={pfpURL}
+                  setCroppedImage={setPfpURL}
+                />
+                <DialogFooter className="mr-auto">
+                  <DialogClose asChild>
+                    <Button type="button" variant="secondary">
+                      Upload
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            {/* <Label
               htmlFor="image"
               className={`absolute bottom-2 right-2 cursor-pointer transition-opacity opacity-0 group-hover:opacity-100 ${buttonVariants()}`}
             >
               <PenLine />
-            </Label>
+            </Label> */}
           </div>
         </form>
       </div>

@@ -2,9 +2,9 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 
 export default async function AuthError({
-  params: searchParams
+  searchParams
 }: {
-  params: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
 
@@ -27,6 +27,10 @@ export default async function AuthError({
     case "Verification":
       errorMessage =
         "The magic link has expired or is invalid. Please request a new one.";
+      break;
+    case "CodeExpired":
+      errorMessage =
+        "This verification code has expired or does not exist. Please request a new one.";
       break;
     case "AccessDenied":
       errorMessage = "Access denied. You do not have permission to sign in.";

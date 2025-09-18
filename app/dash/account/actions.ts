@@ -25,7 +25,7 @@ export async function saveChanges(
 
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
-  const pfp = formData.get("image") as File;
+  const pfp = convertBase64ToFile(formData.get("image") as string, "pfp.jpg");
 
   if (!name || !email) {
     return { type: "error", message: "Name and email are required" };
@@ -43,14 +43,6 @@ export async function saveChanges(
     return { type: "error", message: "Profile picture is too large" };
   }
 
-  if (
-    pfp &&
-    pfp.size > 0 &&
-    !["image/jpeg", "image/png", "image/gif"].includes(pfp.type)
-  ) {
-    return { type: "error", message: "Invalid profile picture format" };
-  }
-
   if (pfp && pfp.size > 0) {
     const buffer = Buffer.from(await pfp.arrayBuffer());
     const fileName = `${session.user.email.replace(/[@.]/g, "_")}_pfp_${Date.now()}.jpg`;
@@ -65,19 +57,20 @@ export async function saveChanges(
     Bun.write(`./public/uploads/${fileName}`, compressedImageBuffer);
   }
 
-  if (email === session.user.email) {
-    // Only update name
-    try {
-      await prisma.user.update({
-        where: { email: session.user.email },
-        data: { name }
-      });
-    } catch (error) {
-      console.error("Error updating user:", error);
-      return { type: "error", message: "Update failed" };
-    }
-    return { type: "success", message: "Saved!" };
+  // Only update name
+  try {
+    await prisma.user.update({
+      where: { email: session.user.email },
+      data: { name }
+    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return { type: "error", message: "Update failed" };
   }
+  revalidatePath("/dash/account");
+
+  if (email === session.user.email)
+    return { type: "success", message: "Saved!" };
 
   const changeCode = Math.floor(100000 + Math.random() * 900000);
 
@@ -95,11 +88,31 @@ export async function saveChanges(
     })
   });
 
-  // await prisma.user.update({
-  //   where: { email: session.user.email },
-  //   data: { name, email }
-  // });
+  await prisma.user.update({
+    where: { email: session.user.email },
+    data: { emailPending: email, emailVerificationCode: changeCode }
+  });
 
   revalidatePath("/dash/account");
   return { type: "info", message: "Email change requested" };
+}
+
+function convertBase64ToFile(base64String: string, filename: string) {
+  // 1. Separate MIME type and raw Base64 data
+  const arr = base64String.split(",");
+  const mimeMatch = arr[0].match(/:(.*?);/);
+  const mime = mimeMatch ? mimeMatch[1] : "";
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+
+  // 2. Decode and convert to Uint8Array
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  // 3. Create a File object
+  const file = new File([u8arr], filename, { type: mime });
+
+  return file;
 }
