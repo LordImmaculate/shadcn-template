@@ -25,7 +25,10 @@ export async function saveChanges(
 
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
-  const pfp = convertBase64ToFile(formData.get("image") as string, "pfp.jpg");
+  const pfpBase64 = formData.get("image") as string;
+  const pfp = pfpBase64
+    ? convertBase64ToFile(pfpBase64, "profile-picture.jpg")
+    : null;
 
   if (!name || !email) {
     return { type: "error", message: "Name and email are required" };
