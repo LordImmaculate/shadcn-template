@@ -26,9 +26,10 @@ export async function saveChanges(
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const pfpBase64 = formData.get("image") as string;
-  const pfp = pfpBase64
-    ? convertBase64ToFile(pfpBase64, "profile-picture.jpg")
-    : null;
+  // const pfp = pfpBase64
+  //   ? convertBase64ToFile(pfpBase64, "profile-picture.jpg")
+  //   : null;
+  const pfp = null;
 
   if (!name || !email) {
     return { type: "error", message: "Name and email are required" };
@@ -70,18 +71,28 @@ export async function saveChanges(
     console.error("Error updating user:", error);
     return { type: "error", message: "Update failed" };
   }
-  revalidatePath("/dash/account");
 
-  if (email === session.user.email)
+  if (email === session.user.email) {
+    revalidatePath("/dash/account");
     return { type: "success", message: "Saved!" };
+  }
 
   const changeCode = Math.floor(100000 + Math.random() * 900000);
 
+  try {
+    await prisma.user.update({
+      where: { email: session.user.email },
+      data: { email, emailVerificationCode: changeCode, emailVerified: null }
+    });
+  } catch {
+    return { type: "error", message: "Update failed" };
+  }
+
   // Update both name and email
   const resend = new Resend(process.env.AUTH_RESEND_KEY);
-  const { data, error } = await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: process.env.EMAIL_FROM as string,
-    to: session.user.email,
+    to: email,
     subject: "Change of Email Requested",
     react: VerifyEmail({
       name: name || "User",
@@ -91,10 +102,13 @@ export async function saveChanges(
     })
   });
 
-  await prisma.user.update({
-    where: { email: session.user.email },
-    data: { emailPending: email, emailVerificationCode: changeCode }
-  });
+  if (error) {
+    console.error("RESEND:", error.name, error.message);
+    return {
+      type: "error",
+      message: "An error occured whilst sending your verification email."
+    };
+  }
 
   revalidatePath("/dash/account");
   return { type: "info", message: "Email change requested" };

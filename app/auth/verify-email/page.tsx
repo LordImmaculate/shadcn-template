@@ -25,20 +25,21 @@ export default async function VerifyEmailPage({
   if (
     !user ||
     user.emailVerificationCode !== Number(code) ||
-    !user.emailPending
+    user.emailVerified
   ) {
     redirect("/auth/error?error=CodeExpired");
   }
 
-  await prisma.user.update({
-    where: { email: session.user.email },
-    data: {
-      emailVerified: null,
-      emailVerificationCode: null,
-      email: user.emailPending,
-      emailPending: null
-    }
-  });
+  try {
+    await prisma.user.update({
+      where: { email: session.user.email },
+      data: {
+        emailVerified: new Date()
+      }
+    });
+  } catch {
+    redirect("/dash/account?success=0&text=Update%20failed");
+  }
 
-  redirect("/dash/account?success=1&text=Email%20verified%20successfully");
+  redirect("/dash/account?success=1&text=Successfully%20changed%20email");
 }
