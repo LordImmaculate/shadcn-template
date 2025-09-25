@@ -26,10 +26,11 @@ export async function saveChanges(
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const pfpBase64 = formData.get("image") as string;
-  // const pfp = pfpBase64
-  //   ? convertBase64ToFile(pfpBase64, "profile-picture.jpg")
-  //   : null;
-  const pfp = null;
+  let pfp;
+  if (!pfpBase64.includes("uploads") && !pfpBase64.includes("default"))
+    pfp = pfpBase64
+      ? convertBase64ToFile(pfpBase64, "profile-picture.jpg")
+      : null;
 
   if (!name || !email) {
     return { type: "error", message: "Name and email are required" };
