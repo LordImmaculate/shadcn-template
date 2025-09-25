@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { VerifyEmail } from "@/components/email-templates/verify-email";
 import { prisma } from "@/prisma";
+import { profileSchema } from "@/schemas/profile-schema";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Resend } from "resend";
@@ -23,36 +24,28 @@ export async function saveChanges(
     redirect("/auth/sign-in");
   }
 
-  const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
-  const pfpBase64 = formData.get("image") as string;
-  let pfp;
-  if (!pfpBase64.includes("uploads") && !pfpBase64.includes("default"))
-    pfp = pfpBase64
-      ? convertBase64ToFile(pfpBase64, "profile-picture.jpg")
-      : null;
+  const validatedFields = profileSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    image: formData.get("image")
+  });
 
-  if (!name || !email) {
-    return { type: "error", message: "Name and email are required" };
-  }
+  if (!validatedFields.success)
+    return {
+      type: "error",
+      message: "Your form has errors."
+    };
 
-  if (email.length > 255) {
-    return { type: "error", message: "Email is too long" };
-  }
+  const { name, email, image } = validatedFields.data;
 
-  if (name.length > 100) {
-    return { type: "error", message: "Name is too long" };
-  }
+  if (image && image.includes("uploads") && image.includes("default")) {
+    const base64Data = image.split(",")[1];
 
-  if (pfp && pfp.size > 5 * 1024 * 1024) {
-    return { type: "error", message: "Profile picture is too large" };
-  }
+    const buffer = Buffer.from(base64Data, "base64");
 
-  if (pfp && pfp.size > 0) {
-    const buffer = Buffer.from(await pfp.arrayBuffer());
     const fileName = `${session.user.email.replace(/[@.]/g, "_")}_pfp_${Date.now()}.jpg`;
     const compressedImageBuffer = await sharp(buffer)
-      .resize(800) // Optional: resize the image
+      .resize(800) // Resize the image
       .jpeg({ quality: 80 }) // Compress as JPEG with 80% quality
       .toBuffer();
     await prisma.user.update({
