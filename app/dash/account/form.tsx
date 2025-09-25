@@ -93,20 +93,6 @@ export default function Form({
               placeholder="blur"
               blurDataURL="/default-blur.png"
             />
-            {/* <AvatarFallback className="rounded-lg">{initials}</AvatarFallback> */}
-            {/* <Input
-              type="file"
-              name="image"
-              id="image"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setPfpURL(URL.createObjectURL(file));
-                }
-              }}
-            /> */}
             <Dialog>
               <DialogTrigger
                 className={`absolute bottom-2 right-2 transition-opacity opacity-0 group-hover:opacity-100 ${buttonVariants({ size: "icon" })}`}
@@ -130,12 +116,6 @@ export default function Form({
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            {/* <Label
-              htmlFor="image"
-              className={`absolute bottom-2 right-2 cursor-pointer transition-opacity opacity-0 group-hover:opacity-100 ${buttonVariants()}`}
-            >
-              <PenLine />
-            </Label> */}
           </div>
         </form>
       </div>

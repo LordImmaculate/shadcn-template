@@ -41,5 +41,5 @@ export default async function VerifyEmailPage({
     redirect("/dash/account?success=0&text=Update%20failed");
   }
 
-  redirect("/dash/account?success=1&text=Successfully%20changed%20email");
+  redirect("/dash/account?success=1&text=Successfully%20verified%20email");
 }

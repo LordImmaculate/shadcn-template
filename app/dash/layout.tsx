@@ -21,11 +21,11 @@ export default async function DashLayout({
 }>) {
   const session = await auth();
 
+  if (!session) return redirect("/auth/sign-in");
+
   const user = await prisma.user.findUnique({
     where: { email: session?.user?.email || undefined }
   });
-
-  if (!session) return redirect("/auth/sign-in");
 
   return (
     <SidebarProvider>

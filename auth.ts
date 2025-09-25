@@ -17,7 +17,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   pages: {
     signIn: "/auth/sign-in",
-    // signOut: "/auth/sign-out",
-    error: "/auth/error"
+    error: "/auth/error",
+    verifyRequest: "/auth/verify-request"
   }
 });
