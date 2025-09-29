@@ -1,11 +1,12 @@
-"use client";
+import NumberBlock from "@/components/number-block";
+import { prisma } from "@/prisma";
 
-import { toast } from "sonner";
+export default async function Dash() {
+  const users = await prisma.user.count();
 
-export default function Dash() {
   return (
-    <button onClick={() => toast("Client Button Clicked")}>
-      Client Button
-    </button>
+    <div>
+      <NumberBlock number={users} label={users === 1 ? "User" : "Users"} />
+    </div>
   );
 }
