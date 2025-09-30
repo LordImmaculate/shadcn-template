@@ -7,10 +7,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "./ui/dropdown-menu";
-import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
+import { BadgeCheck, ChevronsUpDown, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { isMobile } from "@/lib/server-utils";
 import Image from "next/image";
+import { prisma } from "@/prisma";
 
 export default async function UserCard() {
   const mobile = await isMobile();
@@ -21,6 +22,12 @@ export default async function UserCard() {
   const imageURL = session.user.image
     ? `/uploads/${session.user.image}`
     : "/default-pfp.png";
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email! }
+  });
+
+  if (!user) return null;
 
   const initials = session.user.name
     .split(" ")
@@ -61,6 +68,14 @@ export default async function UserCard() {
             Account Management
           </Link>
         </DropdownMenuItem>
+        {user.role === "ADMIN" && (
+          <DropdownMenuItem>
+            <Link href="/dash/admin" className="flex items-center gap-2">
+              <Settings />
+              Admin
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <form
