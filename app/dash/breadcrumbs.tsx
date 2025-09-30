@@ -17,6 +17,47 @@ type Crumb = {
   href: string;
 };
 
+// Recursive function to find page in nested structure
+function findPageInHierarchy(
+  pages: typeof pagesIndex,
+  targetPath: string
+): string | null {
+  for (const page of pages) {
+    // Check exact match
+    if (page.url === targetPath) {
+      return page.title;
+    }
+
+    // Check if this is a dynamic route match
+    const pageSegments = page.url.split("/");
+    const targetSegments = targetPath.split("/");
+
+    if (pageSegments.length === targetSegments.length) {
+      let isMatch = true;
+      for (let i = 0; i < pageSegments.length; i++) {
+        // Skip dynamic segments (containing brackets)
+        if (pageSegments[i].includes("[") && pageSegments[i].includes("]")) {
+          continue;
+        }
+        if (pageSegments[i] !== targetSegments[i]) {
+          isMatch = false;
+          break;
+        }
+      }
+      if (isMatch) {
+        return page.title;
+      }
+    }
+
+    // Recursively search in nested items
+    if (page.items && page.items.length > 0) {
+      const found = findPageInHierarchy(page.items, targetPath);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 export default function Breadcrumbs() {
   const path = usePathname();
   const pages = path?.split("/") || [];
@@ -29,13 +70,8 @@ export default function Breadcrumbs() {
     if (!page || page === "dash") return;
     pathSoFar += `/${page}`;
     console.log(pathSoFar);
-    let pageName;
 
-    pagesIndex.forEach((page) => {
-      if (page.url === pathSoFar) {
-        pageName = page.title;
-      }
-    });
+    const pageName = findPageInHierarchy(pagesIndex, pathSoFar);
 
     if (pageName) {
       breadcrumbs.push({ name: pageName, href: pathSoFar });

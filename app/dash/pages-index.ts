@@ -13,5 +13,28 @@ export const pagesIndex: Page[] = [
     isActive: true,
     hidden: true,
     items: []
+  },
+  {
+    url: "/dash/admin",
+    title: "Admin",
+    isActive: false,
+    hidden: true,
+    items: [
+      {
+        url: "/dash/admin/user",
+        title: "Users",
+        isActive: false,
+        hidden: false,
+        items: [
+          {
+            url: "/dash/admin/user/[user]",
+            title: "User Details",
+            isActive: false,
+            hidden: false,
+            items: []
+          }
+        ]
+      }
+    ]
   }
 ];

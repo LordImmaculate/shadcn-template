@@ -14,11 +14,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export const columns: ColumnDef<User>[] = [
   {
+    accessorKey: "name",
+    header: "Name"
+  },
+  {
     accessorKey: "email",
-    header: "Email"
+    header: "Email",
+    cell: ({ row }) => {
+      const email = row.getValue("email") as string;
+      return (
+        <span
+          onClick={() => {
+            navigator.clipboard.writeText(email);
+            toast.success("Email copied to clipboard");
+          }}
+          className="lowercase cursor-pointer"
+        >
+          {email}
+        </span>
+      );
+    }
   },
   {
     accessorKey: "role",
@@ -41,14 +60,16 @@ export const columns: ColumnDef<User>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() => {
-                navigator.clipboard.writeText(user.email);
-                toast.success("Email copied to clipboard");
+                navigator.clipboard.writeText(user.id);
+                toast.success("User ID copied to clipboard");
               }}
             >
-              Copy email
+              Copy ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View user</DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href={`/dash/admin/user/${user.id}`}>View user</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

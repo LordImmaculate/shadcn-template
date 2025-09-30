@@ -1,5 +1,7 @@
-import { auth } from "@/auth";
 import { prisma } from "@/prisma";
+import { columns } from "./columns";
+import { DataTable } from "./data-table";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 export default async function Admin() {
@@ -13,5 +15,6 @@ export default async function Admin() {
     redirect("/dash");
   }
 
-  return <div className="p-4">Admin Dashboard</div>;
+  const users = await prisma.user.findMany();
+  return <DataTable columns={columns} data={users} />;
 }
