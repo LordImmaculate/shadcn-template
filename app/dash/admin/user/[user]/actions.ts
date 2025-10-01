@@ -90,6 +90,10 @@ export async function changeUserRole(id: string, role: Role) {
   if (!session || !session.user || !session.user.email)
     redirect("/auth/sign-in");
 
+  if (id === session.user.id) {
+    return { type: "error", message: "You cannot change your own role." };
+  }
+
   const authenticatedUser = await prisma.user.findUnique({
     where: { id: session.user.id }
   });

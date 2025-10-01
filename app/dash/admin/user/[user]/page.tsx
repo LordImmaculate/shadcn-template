@@ -104,29 +104,31 @@ export default async function Dash({
         email={user.email || ""}
         pfpURLServer={user.image ? `/uploads/${user.image}` : "/default.jpg"}
       />
-      <div className="flex flex-row justify-end gap-2 mt-4">
-        <RoleSelector user={user} />
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive">Delete User</Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete this
-                account and remove their data from the servers.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <form action={deleteUser.bind(null, userID)}>
-                <AlertDialogAction type="submit">Continue</AlertDialogAction>
-              </form>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+      {userID === session?.user?.id ? null : (
+        <div className="flex flex-row justify-end gap-2 mt-4">
+          <RoleSelector user={user} />
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">Delete User</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  this account and remove their data from the servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <form action={deleteUser.bind(null, userID)}>
+                  <AlertDialogAction type="submit">Continue</AlertDialogAction>
+                </form>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
     </>
   );
 }
