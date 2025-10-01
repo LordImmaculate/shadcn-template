@@ -1,12 +1,9 @@
-import NumberBlock from "@/components/number-block";
-import { prisma } from "@/prisma";
+import { TypographyH1 } from "@/components/typography";
 
 export default async function Dash() {
-  const users = await prisma.user.count();
-
   return (
     <div>
-      <NumberBlock number={users} label={users === 1 ? "User" : "Users"} />
+      <TypographyH1>Dashboard</TypographyH1>
     </div>
   );
 }

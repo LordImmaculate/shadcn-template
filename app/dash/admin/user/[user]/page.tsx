@@ -14,6 +14,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Role } from "@prisma/client";
+import { changeUserRole } from "./actions";
+import RoleSelector from "./role-selector";
 
 async function deleteUser(userId: string) {
   "use server";
@@ -53,10 +63,12 @@ async function deleteUser(userId: string) {
     });
   } catch (error) {
     console.error("Error deleting user:", error);
-    throw new Error("Failed to delete user");
+    redirect(
+      `/dash/admin/user/${userId}?success=0&text=Failed%20to%20delete%20user`
+    );
   }
 
-  redirect("/dash/admin/user");
+  redirect("/dash/admin/user?success=1&text=User%20deleted%20successfully");
 }
 
 export default async function Dash({
@@ -93,6 +105,7 @@ export default async function Dash({
         pfpURLServer={user.image ? `/uploads/${user.image}` : "/default.jpg"}
       />
       <div className="flex flex-row justify-end gap-2 mt-4">
+        <RoleSelector user={user} />
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive">Delete User</Button>
@@ -102,7 +115,7 @@ export default async function Dash({
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. This will permanently delete this
-                account and remove your data from our servers.
+                account and remove their data from the servers.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

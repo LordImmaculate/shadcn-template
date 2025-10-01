@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/prisma";
 import { profileSchema } from "@/schemas/profile-schema";
+import { Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import sharp from "sharp";
@@ -81,4 +82,31 @@ export async function saveChanges(
 
   revalidatePath("/dash/admin/user");
   return { type: "success", message: "Changes saved!" };
+}
+
+export async function changeUserRole(id: string, role: Role) {
+  const session = await auth();
+
+  if (!session || !session.user || !session.user.email)
+    redirect("/auth/sign-in");
+
+  const authenticatedUser = await prisma.user.findUnique({
+    where: { id: session.user.id }
+  });
+
+  if (!authenticatedUser || authenticatedUser.role !== "ADMIN")
+    redirect("/dash");
+
+  try {
+    await prisma.user.update({
+      where: { id },
+      data: { role }
+    });
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    return { type: "error", message: "Role update failed" };
+  }
+
+  revalidatePath("/dash/admin/user");
+  return { type: "success", message: "Role updated!" };
 }

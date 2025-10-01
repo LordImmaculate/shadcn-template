@@ -1,13 +1,24 @@
+import { cn } from "@/lib/utils";
+
 export default function NumberBlock({
   number,
-  label
-}: {
+  label,
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
   number: number;
   label: string;
+  className?: string;
 }) {
   return (
-    <div className="flex flex-col bg-accent p-2 m-4 rounded-xl text-center">
-      <span className="text-2xl font-bold mt-3">{number}</span>
+    <div
+      className={cn(
+        className,
+        "flex flex-col bg-background border border-accent p-4 m-4 rounded-xl text-center"
+      )}
+      {...props}
+    >
+      <span className="text-2xl font-bold">{number}</span>
       {label}
     </div>
   );

@@ -15,7 +15,7 @@ enum Role {
 
 model User {
     id                    String          @id @default(cuid())
-    name                  String?
+    name                  String          @default("New User")
     email                 String          @unique
     emailVerified         DateTime?
     emailVerificationCode Int?
