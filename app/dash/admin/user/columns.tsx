@@ -19,7 +19,18 @@ import Link from "next/link";
 export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "name",
-    header: "Name"
+    header: "Name",
+    cell: ({ row }) => {
+      const name = row.getValue("name") as string;
+      return (
+        <Link
+          href={`/dash/admin/user/${row.original.id}`}
+          className="font-medium hover:underline"
+        >
+          {name}
+        </Link>
+      );
+    }
   },
   {
     accessorKey: "email",

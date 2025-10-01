@@ -6,7 +6,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable
 } from "@tanstack/react-table";
 
@@ -18,9 +17,13 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useState } from "react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import { useRouter, useSearchParams } from "next/navigation";
+import { fi } from "zod/v4/locales";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -29,34 +32,77 @@ interface DataTableProps<TData, TValue> {
 
 export function DataTable<TData, TValue>({
   columns,
-  data
-}: DataTableProps<TData, TValue>) {
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
+  data,
+  userCount,
+  currentPage,
+  totalPages
+}: DataTableProps<TData, TValue> & {
+  userCount: number;
+  currentPage: number;
+  totalPages: number;
+}) {
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      columnFilters
-    }
+    getCoreRowModel: getCoreRowModel()
   });
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const filter = searchParams.get("filter") || "";
+
+  function handleFilter(formData: FormData) {
+    const name = formData.get("filter") || "";
+    router.push(`/dash/admin/user?page=${currentPage}&filter=${name}`);
+  }
+
+  const backDisabled = currentPage <= 1;
+  const nextDisabled = currentPage >= totalPages;
 
   return (
     <div>
-      <div className="flex items-center py-4">
+      <form
+        action={handleFilter}
+        className="flex items-center justify-between py-4"
+      >
         <Input
+          defaultValue={filter}
+          name="filter"
           placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
+          className="max-w-[300px]"
         />
-      </div>
+        <Button type="submit" className="ml-4" variant="outline">
+          Apply Filter
+        </Button>
+        <span className="flex-1 text-center">
+          Showing {data.length} of {userCount} users (Page {currentPage} of{" "}
+          {totalPages})
+        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <Link
+            href={`/dash/admin/user?page=${currentPage - 1}`}
+            className={
+              buttonVariants({
+                variant: "outline",
+                size: "sm"
+              }) + (backDisabled && " pointer-events-none opacity-50")
+            }
+          >
+            Previous
+          </Link>
+          <Link
+            href={`/dash/admin/user?page=${currentPage + 1}`}
+            className={
+              buttonVariants({
+                variant: "outline",
+                size: "sm",
+                ...(currentPage >= totalPages && { disabled: true })
+              }) + (nextDisabled && " pointer-events-none opacity-50")
+            }
+          >
+            Next
+          </Link>
+        </div>
+      </form>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -106,24 +152,6 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
       </div>
     </div>
   );

@@ -14,15 +14,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import { Role } from "@prisma/client";
-import { changeUserRole } from "./actions";
 import RoleSelector from "./role-selector";
 
 async function deleteUser(userId: string) {
@@ -106,7 +97,10 @@ export default async function Dash({
       />
       {userID === session?.user?.id ? null : (
         <div className="flex flex-row justify-end gap-2 mt-4">
-          <RoleSelector user={user} />
+          <div className="flex flex-row gap-2 items-center">
+            <label htmlFor="role">Role:</label>
+            <RoleSelector user={user} />
+          </div>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive">Delete User</Button>
@@ -122,7 +116,9 @@ export default async function Dash({
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <form action={deleteUser.bind(null, userID)}>
-                  <AlertDialogAction type="submit">Continue</AlertDialogAction>
+                  <AlertDialogAction type="submit" asChild>
+                    <Button variant="destructive">Delete</Button>
+                  </AlertDialogAction>
                 </form>
               </AlertDialogFooter>
             </AlertDialogContent>
