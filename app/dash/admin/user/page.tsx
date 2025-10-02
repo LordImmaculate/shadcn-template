@@ -3,6 +3,7 @@ import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { checkAuthAdmin } from "@/lib/check-auth";
 
 const USERS_PER_PAGE = 20;
 
@@ -12,14 +13,7 @@ export default async function Admin({
   searchParams: Promise<{ page?: string; filter?: string }>;
 }) {
   const session = await auth();
-
-  const user = await prisma.user.findUnique({
-    where: { id: session?.user?.id }
-  });
-
-  if (!session || !user || user.role !== "ADMIN") {
-    redirect("/dash");
-  }
+  if (!checkAuthAdmin(session)) redirect("/dash");
 
   const currentPage = parseInt((await searchParams).page || "1");
   const filter = (await searchParams).filter || "";

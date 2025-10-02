@@ -1,20 +1,15 @@
 import { auth } from "@/auth";
 import NumberBlock from "@/components/number-block";
+import { checkAuthAdmin } from "@/lib/check-auth";
 import { prisma } from "@/prisma";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function Admin() {
   const session = await auth();
+  if (!checkAuthAdmin(session)) redirect("/dash");
+
   const users = await prisma.user.count();
-
-  const user = await prisma.user.findUnique({
-    where: { id: session?.user?.id }
-  });
-
-  if (!session || !user || user.role !== "ADMIN") {
-    redirect("/dash");
-  }
 
   return (
     <div className="p-4">

@@ -22,7 +22,8 @@ export default async function Dash() {
     "use server";
     const session = await auth();
     if (!session?.user?.id) {
-      throw new Error("Unauthorized: No active session");
+      console.error("Unauthorized: No active session");
+      redirect("/dash/account?success=0&text=Unauthorized");
     }
 
     try {

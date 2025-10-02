@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { TypographyH1 } from "@/components/typography";
 
 export default async function Dash() {

@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import RoleSelector from "./role-selector";
+import { checkAuthAdmin } from "@/lib/check-auth";
 
 async function deleteUser(userId: string) {
   "use server";
@@ -22,7 +23,8 @@ async function deleteUser(userId: string) {
   // Security: Verify authentication and authorization
   const session = await auth();
   if (!session?.user?.id) {
-    throw new Error("Unauthorized: No active session");
+    console.log("Error: No active session");
+    redirect(`/dash/admin/user/${userId}?success=0&text=Unauthorized`);
   }
 
   const currentUser = await prisma.user.findUnique({
@@ -31,12 +33,16 @@ async function deleteUser(userId: string) {
   });
 
   if (!currentUser || currentUser.role !== "ADMIN") {
-    throw new Error("Unauthorized: Admin access required");
+    console.log("Error: Unauthorized deletion attempt");
+    redirect(`/dash/admin/user/${userId}?success=0&text=Unauthorized`);
   }
 
   // Security: Prevent self-deletion
   if (userId === session.user.id) {
-    throw new Error("Cannot delete your own account");
+    console.log("Error: Admin attempted to delete their own account");
+    redirect(
+      `/dash/admin/user/${userId}?success=0&text=You%20cannot%20delete%20your%20own%20account`
+    );
   }
 
   // Security: Verify target user exists
@@ -45,7 +51,8 @@ async function deleteUser(userId: string) {
   });
 
   if (!targetUser) {
-    throw new Error("User not found");
+    console.error("Error: User not found");
+    redirect(`/dash/admin/user/${userId}?success=0&text=User%20not%20found`);
   }
 
   try {
@@ -68,14 +75,7 @@ export default async function Dash({
   params: Promise<{ user: string }>;
 }) {
   const session = await auth();
-
-  const userCheck = await prisma.user.findUnique({
-    where: { id: session?.user?.id }
-  });
-
-  if (!session || !userCheck || userCheck.role !== "ADMIN") {
-    redirect("/dash");
-  }
+  if (!checkAuthAdmin(session)) redirect("/dash");
 
   const { user: userID } = await params;
   const user = await prisma.user.findUnique({

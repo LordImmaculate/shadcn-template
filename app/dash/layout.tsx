@@ -13,6 +13,7 @@ import ThemeToggle from "@/components/theme-toggle";
 import ToastSender from "./toast-sender";
 import UnverifiedEmail from "@/components/unverified-email";
 import { prisma } from "@/prisma";
+import { checkAuth } from "@/lib/check-auth";
 
 export default async function DashLayout({
   children
@@ -20,8 +21,7 @@ export default async function DashLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-
-  if (!session) return redirect("/auth/sign-in");
+  if (!checkAuth(session)) redirect("/auth/signin");
 
   const user = await prisma.user.findUnique({
     where: { email: session?.user?.email || undefined }
