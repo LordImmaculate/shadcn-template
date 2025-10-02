@@ -2,10 +2,8 @@
 
 import {
   ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   useReactTable
 } from "@tanstack/react-table";
 
@@ -21,9 +19,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { fi } from "zod/v4/locales";
-import { cn } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

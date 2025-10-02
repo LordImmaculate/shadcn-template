@@ -69,7 +69,6 @@ export default function Breadcrumbs() {
   pages.forEach((page) => {
     if (!page || page === "dash") return;
     pathSoFar += `/${page}`;
-    console.log(pathSoFar);
 
     const pageName = findPageInHierarchy(pagesIndex, pathSoFar);
 

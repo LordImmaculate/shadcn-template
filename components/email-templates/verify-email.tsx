@@ -1,4 +1,4 @@
-import { TypographyH1, TypographyInlineCode, TypographyP } from "../typography";
+import { TypographyH1, TypographyP } from "../typography";
 import { buttonVariants } from "../ui/button";
 
 export function VerifyEmail({
