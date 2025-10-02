@@ -21,7 +21,7 @@ export default async function DashLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-  if (!checkAuth(session)) redirect("/auth/signin");
+  if (!checkAuth(session)) redirect("/auth/sign-in");
 
   const user = await prisma.user.findUnique({
     where: { email: session?.user?.email || undefined }
