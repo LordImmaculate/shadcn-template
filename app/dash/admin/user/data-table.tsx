@@ -18,10 +18,10 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { fi } from "zod/v4/locales";
 import { cn } from "@/lib/utils";
 
@@ -34,10 +34,12 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   userCount,
+  userCountFiltered,
   currentPage,
   totalPages
 }: DataTableProps<TData, TValue> & {
   userCount: number;
+  userCountFiltered: number;
   currentPage: number;
   totalPages: number;
 }) {
@@ -48,7 +50,13 @@ export function DataTable<TData, TValue>({
   });
   const router = useRouter();
   const searchParams = useSearchParams();
-  const filter = searchParams.get("filter") || "";
+  const [filter, setFilter] = useState(searchParams.get("filter") || "");
+
+  useEffect(() => {
+    if (Number(searchParams.get("page")) > totalPages && totalPages > 0) {
+      router.push(`/dash/admin/user?page=${totalPages}&filter=${filter}`);
+    }
+  }, [searchParams, totalPages, router, filter]);
 
   function handleFilter(formData: FormData) {
     const name = formData.get("filter") || "";
@@ -57,6 +65,7 @@ export function DataTable<TData, TValue>({
 
   const backDisabled = currentPage <= 1;
   const nextDisabled = currentPage >= totalPages;
+  const filteredOut = userCount - userCountFiltered;
 
   return (
     <div>
@@ -65,21 +74,23 @@ export function DataTable<TData, TValue>({
         className="flex items-center justify-between py-4"
       >
         <Input
-          defaultValue={filter}
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
           name="filter"
-          placeholder="Filter emails..."
+          placeholder="Filter by name or email..."
           className="max-w-[300px]"
         />
         <Button type="submit" className="ml-4" variant="outline">
           Apply Filter
         </Button>
         <span className="flex-1 text-center">
-          Showing {data.length} of {userCount} users (Page {currentPage} of{" "}
+          Showing {data.length} of {userCountFiltered} users{" "}
+          {filteredOut > 0 && `(${userCount} total)`} (Page {currentPage} of{" "}
           {totalPages})
         </span>
         <div className="ml-auto flex items-center gap-2">
           <Link
-            href={`/dash/admin/user?page=${currentPage - 1}`}
+            href={`/dash/admin/user?page=${currentPage - 1}&filter=${filter}`}
             className={
               buttonVariants({
                 variant: "outline",
@@ -90,7 +101,7 @@ export function DataTable<TData, TValue>({
             Previous
           </Link>
           <Link
-            href={`/dash/admin/user?page=${currentPage + 1}`}
+            href={`/dash/admin/user?page=${currentPage + 1}&filter=${filter}`}
             className={
               buttonVariants({
                 variant: "outline",

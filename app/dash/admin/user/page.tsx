@@ -23,20 +23,34 @@ export default async function Admin({
   const offset = (currentPage - 1) * USERS_PER_PAGE;
 
   const userCount = await prisma.user.count();
+  const userCountFiltered = await prisma.user.count({
+    where: {
+      OR: [
+        { email: { contains: filter, mode: "insensitive" } },
+        { name: { contains: filter, mode: "insensitive" } }
+      ]
+    }
+  });
   const users = await prisma.user.findMany({
     take: USERS_PER_PAGE,
     skip: offset,
-    where: { email: { contains: filter } },
-    orderBy: { createdAt: "desc" }
+    where: {
+      OR: [
+        { email: { contains: filter, mode: "insensitive" } },
+        { name: { contains: filter, mode: "insensitive" } }
+      ]
+    },
+    orderBy: { email: "asc" }
   });
 
-  const totalPages = Math.ceil(userCount / USERS_PER_PAGE);
+  const totalPages = Math.ceil(userCountFiltered / USERS_PER_PAGE);
 
   return (
     <DataTable
       columns={columns}
       data={users}
       userCount={userCount}
+      userCountFiltered={userCountFiltered}
       currentPage={currentPage}
       totalPages={totalPages}
     />
