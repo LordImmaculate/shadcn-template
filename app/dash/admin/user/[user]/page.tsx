@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import RoleSelector from "./role-selector";
 import { checkAuthAdmin } from "@/lib/check-auth";
-import { deleteUser } from "./actions";
+import { deleteUser } from "../../../../../actions/edit-profile";
 
 export default async function Dash({
   params
@@ -42,7 +42,7 @@ export default async function Dash({
         userID={userID}
         name={user.name || ""}
         email={user.email || ""}
-        pfpURLServer={user.image ? `/uploads/${user.image}` : "/default.jpg"}
+        pfpURLServer={user.image || "/default.jpg"}
       />
       {userID === session?.user?.id ? null : (
         <div className="flex flex-row justify-end gap-2 mt-4">

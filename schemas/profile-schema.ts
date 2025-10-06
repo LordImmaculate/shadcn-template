@@ -50,7 +50,8 @@ export const profileSchema = z.object({
       {
         message: "Profile picture is too large (max 5MB)"
       }
-    )
+    ),
+  userID: z.string().min(1, { message: "User ID is required" })
 });
 
 export type ProfileSchema = z.infer<typeof profileSchema>;

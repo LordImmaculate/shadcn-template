@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input";
 import { PenLine } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
-import ImageCropper from "./imagecrop";
+import ImageCropper from "@/components/imagecrop";
 import Image from "next/image";
-import { saveChanges } from "./actions";
+import { saveChanges } from "@/actions/edit-profile";
 
 export default function Form({
   userID,
@@ -31,7 +31,7 @@ export default function Form({
   pfpURLServer: string;
 }) {
   const [state, action, pending] = useActionState(saveChanges, undefined);
-  const [pfpURL, setPfpURL] = useState<string | null>(pfpURLServer);
+  const [pfpURL, setPfpURL] = useState<string>(pfpURLServer);
 
   useEffect(() => {
     if (state && state.message)
@@ -89,7 +89,7 @@ export default function Form({
           <div className="absolute right-5 top-5 group">
             <Input type="hidden" name="image" value={pfpURL || ""} />
             <Image
-              src={pfpURL || "/default.jpg"}
+              src={pfpURL}
               alt="User Avatar"
               className="h-44 w-44 rounded-xl"
               width={200}
@@ -108,10 +108,7 @@ export default function Form({
                 <DialogHeader>
                   <DialogTitle>Upload your profile picture here</DialogTitle>
                 </DialogHeader>
-                <ImageCropper
-                  croppedImage={pfpURL}
-                  setCroppedImage={setPfpURL}
-                />
+                <ImageCropper setImage={setPfpURL} />
                 <DialogFooter className="mr-auto">
                   <DialogClose asChild>
                     <Button type="button" variant="secondary">

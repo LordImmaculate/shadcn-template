@@ -11,7 +11,6 @@ import { BadgeCheck, ChevronsUpDown, LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { isMobile } from "@/lib/server-utils";
 import Image from "next/image";
-import { prisma } from "@/prisma";
 
 export default async function UserCard() {
   const mobile = await isMobile();
@@ -19,34 +18,19 @@ export default async function UserCard() {
   if (!session || !session.user) return null;
 
   if (!session.user.name) session.user.name = "No Name";
-  const imageURL = session.user.image
-    ? `/uploads/${session.user.image}`
-    : "/default-pfp.png";
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email! }
-  });
-
-  if (!user) return null;
-
-  const initials = session.user.name
-    .split(" ")
-    .map((name) => name[0])
-    .join("");
+  const imageURL = session.user.image || "/default.jpg";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex flex-row items-center justify-start text-left gap-3 p-2 hover:bg-accent data-[state=open]:bg-sidebar-accent rounded-lg">
-        <Avatar className="h-8 w-8 rounded-lg">
-          <Image
-            src={imageURL}
-            alt="User Avatar"
-            width={48}
-            height={48}
-            priority
-          />
-          <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-        </Avatar>
+        <Image
+          src={imageURL}
+          alt="User Avatar"
+          width={48}
+          height={48}
+          priority
+          className="h-8 w-8 rounded-lg"
+        />
         <div className="flex flex-col">
           <span className="font-medium text-sm truncate max-w-[120px] overflow-hidden whitespace-nowrap text-ellipsis">
             {session.user.name}
@@ -68,7 +52,7 @@ export default async function UserCard() {
             Account Management
           </Link>
         </DropdownMenuItem>
-        {user.role === "ADMIN" && (
+        {session.user.role === "ADMIN" && (
           <DropdownMenuItem>
             <Link href="/dash/admin" className="flex items-center gap-2">
               <Settings />

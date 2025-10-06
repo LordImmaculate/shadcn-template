@@ -1,11 +1,13 @@
 "use server";
 
 import { auth } from "@/auth";
+import { checkUserFolder } from "@/lib/server-utils";
 import { prisma } from "@/prisma";
 import { profileSchema } from "@/schemas/profile-schema";
 import { Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { unlink } from "node:fs/promises";
 import sharp from "sharp";
 
 type SaveChangesResult = {
@@ -22,16 +24,11 @@ export async function saveChanges(
   if (!session || !session.user || !session.user.email)
     redirect("/auth/sign-in");
 
-  const authenticatedUser = await prisma.user.findUnique({
-    where: { id: session.user.id }
-  });
-
-  if (!authenticatedUser) redirect("/auth/sign-in");
-
   const validatedFields = profileSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
-    image: formData.get("image")
+    image: formData.get("image"),
+    userID: formData.get("userID")
   });
 
   if (!validatedFields.success)
@@ -40,15 +37,16 @@ export async function saveChanges(
       message: "Your form has errors."
     };
 
-  const id = formData.get("userID");
-  if (!id || typeof id !== "string") {
-    return { type: "error", message: "Invalid user ID." };
-  }
+  const { name, email, image, userID } = validatedFields.data;
 
-  const { name, email, image } = validatedFields.data;
+  if (userID !== session.user.id && session.user.role !== "ADMIN")
+    return {
+      type: "error",
+      message: "You are not authorized to edit this profile."
+    };
 
   const user = await prisma.user.findUnique({
-    where: { id }
+    where: { id: userID }
   });
 
   if (!user) return { type: "error", message: "User not found." };
@@ -57,22 +55,46 @@ export async function saveChanges(
     const base64Data = image.split(",")[1];
 
     const buffer = Buffer.from(base64Data, "base64");
+    checkUserFolder(user.id);
 
-    const fileName = `${user.email.replace(/[@.]/g, "_")}_pfp_${Date.now()}.jpg`;
+    const fileName = `pfp_${Date.now()}.jpg`;
     const compressedImageBuffer = await sharp(buffer)
       .resize(800) // Resize the image
       .jpeg({ quality: 80 }) // Compress as JPEG with 80% quality
       .toBuffer();
+
+    // Delete previous uploaded image
+    try {
+      const prevImage = user.image;
+      if (prevImage && prevImage.includes("/uploads/")) {
+        const prevPath = `./public${prevImage.startsWith("/") ? "" : "/"}${prevImage}`;
+        // normalize double slashes
+        const normalizedPrevPath = prevPath.replace(/\/+/g, "/");
+        await Bun.file(normalizedPrevPath)
+          .delete()
+          .catch((err) => {
+            console.warn(
+              "Could not delete previous image:",
+              normalizedPrevPath,
+              err
+            );
+          });
+      }
+    } catch (e) {
+      console.warn("Error while attempting to remove previous image:", e);
+    }
+
     await prisma.user.update({
-      where: { id },
-      data: { image: fileName }
+      where: { id: userID },
+      data: { image: `/uploads/${user.id}/${fileName}` }
     });
-    Bun.write(`./public/uploads/${fileName}`, compressedImageBuffer);
+
+    Bun.write(`./public/uploads/${user.id}/${fileName}`, compressedImageBuffer);
   }
 
   try {
     await prisma.user.update({
-      where: { id },
+      where: { id: userID },
       data: { name, email }
     });
   } catch (error) {
@@ -157,6 +179,7 @@ export async function deleteUser(userId: string) {
     await prisma.user.delete({
       where: { id: userId }
     });
+    await unlink(`./public/uploads/${userId}`);
   } catch (error) {
     console.error("Error deleting user:", error);
     redirect(

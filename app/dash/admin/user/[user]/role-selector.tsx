@@ -8,7 +8,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Role, User } from "@prisma/client";
-import { changeUserRole } from "./actions";
+import { changeUserRole } from "../../../../../actions/edit-profile";
 import { toast } from "sonner";
 
 export default function RoleSelector({ user }: { user: User }) {

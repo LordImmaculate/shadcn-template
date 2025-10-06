@@ -30,7 +30,11 @@ export default async function Dash() {
       await prisma.user.delete({
         where: { id: session.user.id }
       });
+      redirect("/");
     } catch (error) {
+      if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+        return;
+      }
       console.error("Error deleting account:", error);
       redirect("/dash/account/?success=0&text=Failed%20to%20delete%20account");
     }
@@ -42,13 +46,10 @@ export default async function Dash() {
   return (
     <>
       <Form
+        userID={session?.user?.id || ""}
         name={session?.user?.name || ""}
         email={session?.user?.email || ""}
-        pfpURLServer={
-          session?.user?.image
-            ? `/uploads/${session?.user?.image}`
-            : "/default.jpg"
-        }
+        pfpURLServer={session?.user?.image || "/default.jpg"}
       />
       <div className="flex flex-row justify-end gap-2 mt-4">
         <AlertDialog>
