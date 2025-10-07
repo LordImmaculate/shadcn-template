@@ -123,16 +123,26 @@ export async function saveChanges(
       await sendVerificationEmail(user.id, name, email, user.email);
 
       revalidatePath("/dash/account");
-      return {
-        type: "info",
-        message: "A verification email has been sent to your new email address."
-      };
+      revalidatePath("/dash/admin/user");
+      if (user.id === session.user.id)
+        return {
+          type: "info",
+          message:
+            "A verification email has been sent to your new email address."
+        };
+      else
+        return {
+          type: "info",
+          message:
+            "User's email changed. A verification email has been sent to the new address."
+        };
     } catch (error) {
       console.error("Error updating email:", error);
       return { type: "error", message: "Email update failed" };
     }
   }
 
+  revalidatePath("/dash/account");
   revalidatePath("/dash/admin/user");
   return { type: "success", message: "Changes saved!" };
 }
