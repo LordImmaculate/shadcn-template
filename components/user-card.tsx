@@ -1,5 +1,4 @@
 import { auth, signOut } from "@/auth";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
