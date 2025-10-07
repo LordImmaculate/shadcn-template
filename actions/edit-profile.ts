@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
+import { VerifyEmail } from "@/components/email-templates/verify-email";
 import { checkUserFolder } from "@/lib/server-utils";
 import { prisma } from "@/prisma";
 import { profileSchema } from "@/schemas/profile-schema";
@@ -8,6 +9,7 @@ import { Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { unlink } from "node:fs/promises";
+import { Resend } from "resend";
 import sharp from "sharp";
 
 type SaveChangesResult = {
@@ -95,11 +97,40 @@ export async function saveChanges(
   try {
     await prisma.user.update({
       where: { id: userID },
-      data: { name, email }
+      data: { name }
     });
   } catch (error) {
     console.error("Error updating user:", error);
     return { type: "error", message: "Update failed" };
+  }
+
+  // Change the email if it's different and send a verification email
+  if (email !== user.email) {
+    try {
+      const emailExists = await prisma.user.findUnique({
+        where: { email }
+      });
+
+      if (emailExists) {
+        return { type: "info", message: "Email is already in use." };
+      }
+
+      await prisma.user.update({
+        where: { id: userID },
+        data: { email }
+      });
+
+      await sendVerificationEmail(user.id, name, email, user.email);
+
+      revalidatePath("/dash/account");
+      return {
+        type: "info",
+        message: "A verification email has been sent to your new email address."
+      };
+    } catch (error) {
+      console.error("Error updating email:", error);
+      return { type: "error", message: "Email update failed" };
+    }
   }
 
   revalidatePath("/dash/admin/user");
@@ -188,4 +219,51 @@ export async function deleteUser(userId: string) {
   }
 
   redirect("/dash/admin/user?success=1&text=User%20deleted%20successfully!");
+}
+
+export async function sendVerificationEmail(
+  id: string,
+  name: string,
+  newEmail: string,
+  oldEmail?: string
+) {
+  const resend = new Resend(process.env.AUTH_RESEND_KEY);
+  const code = Math.floor(100000 + Math.random() * 900000);
+
+  await prisma.user.update({
+    where: { id },
+    data: { emailVerified: null, emailVerificationCode: code }
+  });
+
+  await resend.emails.send({
+    from: process.env.EMAIL_FROM as string,
+    to: newEmail,
+    subject: "Verify your email",
+    react: VerifyEmail({ name, oldEmail, newEmail, code })
+  });
+}
+
+export async function resendEmailVerification(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  currentState: SaveChangesResult | undefined,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  formData: FormData
+): Promise<SaveChangesResult> {
+  const session = await auth();
+
+  if (!session || !session.user || !session.user.email)
+    redirect("/auth/sign-in");
+
+  try {
+    await sendVerificationEmail(
+      session.user.id,
+      session.user.name || "User",
+      session.user.email
+    );
+  } catch (error) {
+    console.error("Error resending verification email:", error);
+    return { type: "error", message: "Failed to resend verification email." };
+  }
+
+  return { type: "info", message: "A verification email has been sent." };
 }

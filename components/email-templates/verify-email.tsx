@@ -8,17 +8,17 @@ export function VerifyEmail({
   code
 }: {
   name: string;
-  oldEmail: string;
+  oldEmail?: string;
   newEmail: string;
   code: number;
 }) {
   return (
     <div>
       <TypographyH1>Change email for {name}</TypographyH1>
-      <TypographyP>Old email: {oldEmail}</TypographyP>
+      {oldEmail && <TypographyP>Old email: {oldEmail}</TypographyP>}
       <TypographyP>New email: {newEmail}</TypographyP>
       <div className="my-4 p-4 bg-muted rounded">
-        Click this button to confirm your new email address:
+        Click this button to confirm your new email address:{" "}
         <a
           href={`${process.env.DOMAIN}/auth/verify-email?code=${code}`}
           className={buttonVariants({})}
