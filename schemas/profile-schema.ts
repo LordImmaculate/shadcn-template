@@ -37,7 +37,12 @@ export const profileSchema = z.object({
     .refine(
       (val) => {
         // If the value is not provided, or it's a pre-existing image path, validation passes.
-        if (!val || val.includes("uploads") || val.includes("default"))
+        if (
+          !val ||
+          val.includes("http") ||
+          val.includes("uploads") ||
+          val.includes("default")
+        )
           return true;
 
         // Separate MIME type from Base64 data to get the size.

@@ -53,7 +53,12 @@ export async function saveChanges(
 
   if (!user) return { type: "error", message: "User not found." };
 
-  if (image && !image.includes("uploads") && !image.includes("default")) {
+  if (
+    image &&
+    !image.includes("http") &&
+    !image.includes("uploads") &&
+    !image.includes("default")
+  ) {
     const base64Data = image.split(",")[1];
 
     const buffer = Buffer.from(base64Data, "base64");
