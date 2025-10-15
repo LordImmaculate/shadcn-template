@@ -87,7 +87,7 @@ export default function Breadcrumbs() {
                 <Link href="/dash">Dashboard</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            {pathSoFar !== "dash" && <BreadcrumbSeparator />}
+            {pathSoFar !== "/dash" && <BreadcrumbSeparator />}
           </div>
           {breadcrumbs.map((crumb, index) => {
             const isLast = index === breadcrumbs.length - 1;
